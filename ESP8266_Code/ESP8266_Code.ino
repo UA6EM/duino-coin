@@ -17,8 +17,8 @@
 /* If during compilation the line below causes a
   "fatal error: arduinoJson.h: No such file or directory"
   message to occur; it means that you do NOT have the
-  ArduinoJSON library installed. To install it, 
-  go to the below link and follow the instructions: 
+  ArduinoJSON library installed. To install it,
+  go to the below link and follow the instructions:
   https://github.com/revoxhere/duino-coin/issues/832 */
 #include <ArduinoJson.h>
 
@@ -39,13 +39,16 @@ using namespace experimental::crypto;
 #include <ESP8266HTTPClient.h>
 #include <WiFiClient.h>
 #include <Ticker.h>
+#include <ESP8266WiFiMulti.h>
+ESP8266WiFiMulti wifiMulti;
 
 namespace {
-const char* SSID          =  "WIFI SSID";    // Change this to your WiFi name
-const char* PASSWORD      =  "WIFI PASS";    // Change this to your WiFi password
-const char* USERNAME      =  "DUCO USERNAME";// Change this to your Duino-Coin username
+const char* SSID          =  "OpenWrt";      // Change this to your WiFi name
+const char* PASSWORD      =  "1234567890as"; // Change this to your WiFi password
+const char* USERNAME      =  "UA6EM";        // Change this to your Duino-Coin username
 const char* RIG_IDENTIFIER = "None";         // Change this if you want a custom miner name (or use Auto to autogenerate)
-const bool USE_HIGHER_DIFF = false;          // Change to true if using 160 MHz to not get the first share rejected
+//const bool USE_HIGHER_DIFF = false;        // Change to true if using 160 MHz to not get the first share rejected
+const bool USE_HIGHER_DIFF = true;           // для частоты процессора 160 Mhz
 
 const char * get_pool_api[] = {"https://server.duinocoin.com/getPool"};
 const char * miner_version = "Official ESP8266 Miner 2.75";
@@ -99,14 +102,14 @@ void UpdatePool() {
     poolIndex += 1;
 
     // Check if pool index needs to roll over
-    if( poolIndex >= poolSize ){
+    if ( poolIndex >= poolSize ) {
       Serial.println("Retrying pool list in: " + String(waitTime) + "s");
       poolIndex %= poolSize;
       delay(waitTime * 1000);
 
       // Increase wait time till a maximum of 16 seconds (addresses: Limit connection requests on failure in ESP boards #1041)
       waitTime *= 2;
-      if( waitTime > 16 )
+      if ( waitTime > 16 )
         waitTime = 16;
     }
   }
@@ -139,19 +142,29 @@ unsigned long lwdTimeOutMillis = LWD_TIMEOUT;
 #define BLINK_RESET_DEVICE   5
 
 void SetupWifi() {
-  Serial.println("Connecting to: " + String(SSID));
-  WiFi.mode(WIFI_STA); // Setup ESP in client mode
-  WiFi.setSleepMode(WIFI_NONE_SLEEP);
-  WiFi.begin(SSID, PASSWORD);
+  /*
+    Serial.println("Connecting to: " + String(SSID));
+    WiFi.mode(WIFI_STA); // Setup ESP in client mode
+    WiFi.setSleepMode(WIFI_NONE_SLEEP);
+    WiFi.begin(SSID, PASSWORD);
 
-  int wait_passes = 0;
-  while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    if (++wait_passes >= 10) {
-      WiFi.begin(SSID, PASSWORD);
-      wait_passes = 0;
+    int wait_passes = 0;
+    while (WiFi.waitForConnectResult() != WL_CONNECTED) {
+     delay(500);
+     Serial.print(".");
+     if (++wait_passes >= 10) {
+       WiFi.begin(SSID, PASSWORD);
+       wait_passes = 0;
+     }
     }
+  */
+  wifiMulti.addAP("Node-1", "Pass-1");
+  wifiMulti.addAP("Node-2", "Pass-2");
+  wifiMulti.addAP("Node-3", "Pass-3");
+  
+  while (wifiMulti.run() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(500);
   }
 
   Serial.println("\nConnected to WiFi!");
@@ -287,7 +300,7 @@ void setup() {
 
   // Autogenerate ID if required
   chipID = String(ESP.getChipId(), HEX);
-  if( strcmp(RIG_IDENTIFIER, "Auto") == 0 ){
+  if ( strcmp(RIG_IDENTIFIER, "Auto") == 0 ) {
     AutoRigName = "ESP8266-" + chipID;
     AutoRigName.toUpperCase();
     RIG_IDENTIFIER = AutoRigName.c_str();
