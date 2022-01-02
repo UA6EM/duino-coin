@@ -43,9 +43,9 @@ using namespace experimental::crypto;
 ESP8266WiFiMulti wifiMulti;
 
 namespace {
-const char* SSID          =  "OpenWrt";      // Change this to your WiFi name
-const char* PASSWORD      =  "1234567890as"; // Change this to your WiFi password
-const char* USERNAME      =  "UA6EM";        // Change this to your Duino-Coin username
+const char* SSID          =  "YOU NODE";      // Change this to your WiFi name
+const char* PASSWORD      =  "YOU PASS"; // Change this to your WiFi password
+const char* USERNAME      =  "DUINO NAME";        // Change this to your Duino-Coin username
 const char* RIG_IDENTIFIER = "None";         // Change this if you want a custom miner name (or use Auto to autogenerate)
 //const bool USE_HIGHER_DIFF = false;        // Change to true if using 160 MHz to not get the first share rejected
 const bool USE_HIGHER_DIFF = true;           // для частоты процессора 160 Mhz
